@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Feed</title>
+</head>
+<body>
+    <video id="videoElement" width="640" height="480" autoplay></video>
+    <div id="statusMessage"></div>
+    <script>
+        const videoElement = document.getElementById("videoElement");
+        const statusMessage = document.getElementById("statusMessage");
+        let websocket;
+
+        // Function to establish WebSocket connection
+        function connectToWebSocket() {
+            websocket = new WebSocket("ws://localhost:8765");  // Adjust the WebSocket server URL and port
+
+            // Event handler for when the WebSocket connection is opened
+            websocket.onopen = function(event) {
+                console.log("WebSocket connection established.");
+                websocket.onmessage = function(event) {
+                    // Update status message with text received from server
+                    statusMessage.textContent = event.data;
+                 };
+            };
+
+            // Event handler for when the WebSocket connection encounters an error
+            websocket.onerror = function(event) {
+                console.error("WebSocket error:", event);
+            };
+
+            // Event handler for when the WebSocket connection is closed
+            websocket.onclose = function(event) {
+                console.log("WebSocket connection closed.");
+            };
+        }
+
+        // Function to capture frame, encode it, and send it to WebSocket server
+        async function sendFrameToServer() {
+            const canvas = document.createElement("canvas");
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            const context = canvas.getContext("2d");
+            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+            // Convert canvas data to Base64-encoded image
+            const imageData = canvas.toDataURL("image/jpeg");
+
+            // Send image data to WebSocket server
+            if (websocket && websocket.readyState === WebSocket.OPEN) {
+                websocket.send(imageData);
+            } else {
+                console.error("WebSocket connection is not open.");
+            }
+        }
+
+        
+
+        async function startVideoStream() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                videoElement.srcObject = stream;
+            } catch (error) {
+                console.error("Error accessing camera:", error);
+            }
+        }
+
+
+        // Connect to WebSocket when page loads
+        window.onload = function() {
+            startVideoStream();
+            connectToWebSocket();
+
+            // Repeat sending frames to server every 5 seconds
+            setInterval(sendFrameToServer, 3000);
+        };
+    </script>
+</body>
+</html>

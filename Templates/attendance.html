@@ -1,0 +1,266 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" 
+          content="width=device-width, initial-scale=1.0">
+    <title>Student Attendance Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/attendance.css') }}">
+</head>
+
+<body>
+    <script>
+        const localStorageData = {{ localStorage_data | tojson | safe }};
+    </script>
+    <div class="navbar">
+        <div class="navbar-brand">
+            <h1> 
+                Student Attendance Portal
+            </h1>
+        </div>
+        <div class="navbar-links">
+            <p>
+                Academic Year: 
+                <span id="academicYear">2024</span>
+            </p>
+            <!-- Add other relevant information -->
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="video-container">
+            <!-- Video element here -->
+            <video id="videoElement" width="640" height="480" autoplay></video>
+            <div id="responseContainer"></div>
+        </div>
+        <div class="form-container">
+            <div id="formSection">
+                <h2>Mark Attendance</h2>
+                <button id="startSocket">
+                    Start Socket
+                </button><br><br>
+                <button id="addStudentBtn">
+                    Register Student
+                </button>
+                <button id="addLinkButton" 
+                    onclick="showlinkStudentForm()">
+                    Link Student
+                </button>
+                <button id="addClassButton" 
+                    onclick="showAddClassForm()">
+                    Add Class
+                </button>
+
+                <label for="classSelector">Class:</label>
+                <select id="classSelector" required 
+                    onchange="showStudentsList()">
+                    <!-- Populate classes dynamically -->
+                </select>
+                <ul id="studentsList">
+                    <!-- Populate students dynamically 
+                        based on the selected class -->
+                </ul>
+
+                <div id="summarySection">
+                    <h3>Summary</h3>
+                    <p>
+                        Total Students: 
+                        <span id="totalStudents">0</span>
+                    </p>
+                    <p>
+                        Total Present: 
+                        <span id="totalPresent">0</span>
+                    </p>
+                    <p>
+                        Total Absent: 
+                        <span id="totalAbsent">0</span>
+                    </p>
+                    <p>
+                        Total Late: 
+                        <span id="totalLeave">0</span>
+                    </p>
+                </div>
+
+                <button onclick="submitAttendance()">
+                    Submit Attendance
+                </button>
+
+                <!-- Result Section -->
+                <div id="resultSection" style="display: none;">
+                    <h3>Attendance Result</h3>
+                    <p>
+                        Date: 
+                        <span id="attendanceDate"></span>
+                    </p>
+                    <p>
+                        Time: 
+                        <span id="attendanceTime"></span>
+                    </p>
+                    <p>
+                        Class: 
+                        <span id="attendanceClass"></span>
+                    </p>
+                    <p>
+                        Total Students: 
+                        <span id="attendanceTotalStudents"></span>
+                    </p>
+                    <p>
+                        Present: 
+                        <span id="attendancePresent"></span>
+                    </p>
+                    <p>
+                        Absent: 
+                        <span id="attendanceAbsent"></span>
+                    </p>
+                    <p>
+                        Leave: 
+                        <span id="attendanceLeave"></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="addStudentPopup" class="popup" style="width: 80vw;height: 80vh;">
+        <button class="popup-close" onclick="closePopup()">Close</button>
+        <iframe src="/register" id="popupregFrame"></iframe>
+    </div>
+
+    <div id="linkStudentPopup" class="popup" style="width: 80vw;height: 80vh;">
+        <button class="popup-close" onclick="closePopup()">Close</button>
+        <iframe src="/fill_class" id="popupFrame"></iframe>
+    </div>
+
+    <div id="addClassPopup" class="popup">
+        <h2>Add Class</h2>
+        <!-- Add Class Form Content -->
+        <label for="newClassName">
+            Class Name:
+        </label>
+        <form action="/add_class" method="post"> 
+            <input type="text" id="newClassName" name="newClassName" required>
+            <input type="time" id="Time" name="Time" required>
+            <!-- Add more fields as needed -->
+    
+            <button type="submit">
+                Submit
+            </button>
+            <button onclick="closePopup()">
+                Cancel
+            </button>
+        </form>
+    </div>
+
+    <script src="/static/js/attendance.js"></script>
+    <script>
+        const videoElement = document.getElementById("videoElement");
+        const statusMessage = document.getElementById("statusMessage");
+        let websocket;
+
+        // Function to establish WebSocket connection
+        function connectToWebSocket() {
+            websocket = new WebSocket("ws://localhost:8765");  // Adjust the WebSocket server URL and port
+
+            // Event handler for when the WebSocket connection is opened
+            websocket.onopen = function(event) {
+                console.log("WebSocket connection established.");
+                websocket.onmessage = function(event) {
+                    // Update status message with text received from server
+                    //statusMessage.textContent = event.data;
+                    receiveMessageFromWebSocket(event.data);
+                    const rollNumber=event.data;
+                    const button = document.querySelector(`li[data-roll-number="${rollNumber}"] button.present`);
+                    button.disabled=false;
+                    button.click();
+                    button.disabled=true;
+                    // const db=1711232690766
+                    // if(Date.now()>db){
+                    //     const button = document.querySelector(`li[data-roll-number="${rollNumber}"] button.leave`);
+                    //     button.disabled=false;
+                    //     button.click();
+                    //button.disabled=true;
+                    // }else{
+                    //     const button = document.querySelector(`li[data-roll-number="${rollNumber}"] button.present`);
+                    //     button.disabled=false;
+                    //     button.click();
+                    //button.disabled=true;
+                    // }
+                    console.log(Date.now())
+                   // button.disabled=true;
+                 };
+            };
+
+            // Event handler for when the WebSocket connection encounters an error
+            websocket.onerror = function(event) {
+                console.error("WebSocket error:", event);
+            };
+
+            // Event handler for when the WebSocket connection is closed
+            websocket.onclose = function(event) {
+                console.log("WebSocket connection closed.");
+            };
+        }
+
+        function receiveMessageFromWebSocket(message) {
+            var popup = document.createElement('div');
+            popup.textContent = message;
+            popup.classList.add('popup_message');
+
+            document.body.appendChild(popup);
+
+            // Remove the pop-up after a certain duration
+            setTimeout(function() {
+                popup.remove();
+            }, 1500); // Adjust duration as needed
+        }
+
+        // Function to capture frame, encode it, and send it to WebSocket server
+        async function sendFrameToServer() {
+            const canvas = document.createElement("canvas");
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            const context = canvas.getContext("2d");
+            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+            // Convert canvas data to Base64-encoded image
+            const imageData = canvas.toDataURL("image/jpeg");
+
+            // Send image data to WebSocket server
+            if (websocket && websocket.readyState === WebSocket.OPEN) {
+                websocket.send(imageData);
+            } else {
+                console.error("WebSocket connection is not open.");
+            }
+        }
+
+        
+
+        async function startVideoStream() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                videoElement.srcObject = stream;
+            } catch (error) {
+                console.error("Error accessing camera:", error);
+            }
+        }
+
+
+        // Connect to WebSocket when page loads
+        window.onload = function() {
+            startVideoStream();
+            document.getElementById('addStudentBtn').addEventListener('click', function() {
+                window.location.href = '/register'; // Redirect to the /register endpoint
+            });
+            document.getElementById('startSocket').addEventListener('click', function() {
+                connectToWebSocket();
+                // Repeat sending frames to server every 5 seconds
+                setInterval(sendFrameToServer, 2000);
+            });
+        };
+
+    </script>
+</body>
+
+</html>

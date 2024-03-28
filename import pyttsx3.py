@@ -1,0 +1,10 @@
+import pyttsx3
+engine = pyttsx3.init("dummy")
+print("Engine initialized successfully")
+volume = engine.getProperty('volume')
+engine.setProperty('volume', volume + 100000000)
+engine.setProperty('voice','hindi')
+print("Current volume:", volume)
+engine.say('Sally sells seashells by the seashore.')
+engine.say('The quick brown fox jumped over the lazy dog.')
+engine.runAndWait()

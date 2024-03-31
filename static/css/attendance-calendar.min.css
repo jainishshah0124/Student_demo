@@ -1,0 +1,328 @@
+.attendance-calendar {
+    background-color: #fff;
+    border-color: #9c27b0;
+    border-width: 1px;
+    border-style: solid;
+    width: 100%;
+    border-collapse: collapse
+}
+
+.attendance-calendar .calender-for-month {
+    background-color: #dcdcdc;
+    padding: 11px;
+    text-align: center;
+    font-size: 15px;
+    color: #000
+}
+
+.attendance-calendar .week-days {
+    color: #000;
+    background-color: #f1f1f1;
+    border: 1px solid #9c27b0;
+    font-weight: 400;
+    padding: 10px;
+    width: 14%
+}
+
+@media (max-width:640px) {
+    .attendance-calendar .week-days {
+        padding: 7px;
+        font-size: 12.5px
+    }
+}
+
+.attendance-calendar .day {
+    border-width: 1px;
+    border: 1px Solid #9c27b0;
+    padding: 5px
+}
+
+.attendance-calendar .day .details {
+    width: 100%
+}
+
+.attendance-calendar .day .details .date {
+    font-size: 15px;
+    width: 30%;
+    display: inline-block
+}
+
+@media (max-width:640px) {
+    .attendance-calendar .day .details .date {
+        font-size: 12.5px
+    }
+}
+
+@media (max-width:440px) {
+    .attendance-calendar .day .details .date {
+        font-size: 11px
+    }
+}
+
+@media (max-width:360px) {
+    .attendance-calendar .day .details .date {
+        font-size: 10px
+    }
+}
+
+.attendance-calendar .day .details .tag {
+    color: #e91e63;
+    font-size: 15px;
+    text-align: right;
+    margin-bottom: 7px;
+    display: inline-block;
+    width: 70%
+}
+
+@media (max-width:640px) {
+    .attendance-calendar .day .details .tag {
+        font-size: 12.5px
+    }
+}
+
+@media (max-width:440px) {
+    .attendance-calendar .day .details .tag {
+        font-size: 11px
+    }
+}
+
+@media (max-width:360px) {
+    .attendance-calendar .day .details .tag {
+        font-size: 10px
+    }
+}
+
+.attendance-calendar .day .details .in,
+.attendance-calendar .day .details .out {
+    color: #7f7975;
+    font-size: 7pt
+}
+
+@media (max-width:640px) {
+
+    .attendance-calendar .day .details .in,
+    .attendance-calendar .day .details .out {
+        font-size: 9px
+    }
+}
+
+.attendance-calendar .day.holiday {
+    background-color: #f1f1f1
+}
+
+.attendance-calendar .day.today {
+    color: #fff;
+    background: #e91e63
+}
+
+.attendance-calendar .day.today .details .in,
+.attendance-calendar .day.today .details .out,
+.attendance-calendar .day.today .details .tag {
+    color: #fff
+}
+
+button,
+hr,
+input {
+    overflow: visible
+}
+
+progress,
+sub,
+sup {
+    vertical-align: baseline
+}
+
+[type=checkbox],
+[type=radio],
+legend {
+    box-sizing: border-box;
+    padding: 0
+}
+
+html {
+    line-height: 1.15;
+    -webkit-text-size-adjust: 100%
+}
+
+body {
+    margin: 0
+}
+
+details,
+main {
+    display: block
+}
+
+h1 {
+    font-size: 2em;
+    margin: .67em 0
+}
+
+hr {
+    box-sizing: content-box;
+    height: 0
+}
+
+code,
+kbd,
+pre,
+samp {
+    font-family: monospace, monospace;
+    font-size: 1em
+}
+
+a {
+    background-color: transparent
+}
+
+abbr[title] {
+    border-bottom: none;
+    text-decoration: underline;
+    text-decoration: underline dotted
+}
+
+b,
+strong {
+    font-weight: bolder
+}
+
+small {
+    font-size: 80%
+}
+
+sub,
+sup {
+    font-size: 75%;
+    line-height: 0;
+    position: relative
+}
+
+sub {
+    bottom: -.25em
+}
+
+sup {
+    top: -.5em
+}
+
+img {
+    border-style: none
+}
+
+button,
+input,
+optgroup,
+select,
+textarea {
+    font-family: inherit;
+    font-size: 100%;
+    line-height: 1.15;
+    margin: 0
+}
+
+button,
+select {
+    text-transform: none
+}
+
+[type=button],
+[type=reset],
+[type=submit],
+button {
+    -webkit-appearance: button
+}
+
+[type=button]::-moz-focus-inner,
+[type=reset]::-moz-focus-inner,
+[type=submit]::-moz-focus-inner,
+button::-moz-focus-inner {
+    border-style: none;
+    padding: 0
+}
+
+[type=button]:-moz-focusring,
+[type=reset]:-moz-focusring,
+[type=submit]:-moz-focusring,
+button:-moz-focusring {
+    outline: ButtonText dotted 1px
+}
+
+fieldset {
+    padding: .35em .75em .625em
+}
+
+legend {
+    color: inherit;
+    display: table;
+    max-width: 100%;
+    white-space: normal
+}
+
+textarea {
+    overflow: auto
+}
+
+[type=number]::-webkit-inner-spin-button,
+[type=number]::-webkit-outer-spin-button {
+    height: auto
+}
+
+[type=search] {
+    -webkit-appearance: textfield;
+    outline-offset: -2px
+}
+
+[type=search]::-webkit-search-decoration {
+    -webkit-appearance: none
+}
+
+::-webkit-file-upload-button {
+    -webkit-appearance: button;
+    font: inherit
+}
+
+summary {
+    display: list-item
+}
+
+[hidden],
+template {
+    display: none
+}
+
+html {
+    background: url(../bg.jpg) no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    font-family: 'roboto';
+}
+
+.api-name {
+    max-width: 350px;
+    margin: 40px auto;
+}
+
+.api-name h1 {
+    padding: 20px 40px;
+    margin: 0;
+    background: rgba(255, 255, 255, 0.75);
+    text-align: center;
+    font-size: 28px;
+    font-weight: 400;
+    color: #9C27B0;
+}
+
+.calender_container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+@media(max-width:640px) {
+    .calender_container {
+        max-width: auto;
+        margin: 0 15px;
+    }
+}

@@ -2,7 +2,7 @@
 <html>
 
 <head>
-	<title>GeeksforGeeks Registration</title>
+	<title>Login</title>
 	<style>
         /*style.css*/
             body {
@@ -35,7 +35,7 @@
                 display: block;
                 width: 100%;
                 margin-top: 10px;
-                margin-bottom: 5px;
+                margin-bottom: 5px; 
                 text-align: left;
                 color: #555;
                 font-weight: bold;
@@ -77,14 +77,17 @@
 <body>
 	<div class="main">
 		<h1>Professor Login</h1>
+        {% if error_message %}
+            <p style="color: red;">{{ error_message }}</p>
+        {% endif %}
 		<h3>Enter your login credentials</h3>
-		<form action="/start_attendance">
+		<form action="/login" method="post">
 			<label for="first">
 				Username:
 			</label>
 			<input type="text"
-				id="first"
-				name="first"
+				id="username"
+				name="username"
 				placeholder="Enter your Username" required>
 
 			<label for="password">
@@ -96,18 +99,11 @@
 				placeholder="Enter your Password" required>
 
 			<div class="wrap">
-				<button type="submit"
-						onclick="solve()">
+				<button type="submit">
 					Submit
 				</button>
 			</div>
 		</form>
-		<!-- <p>Not registered? 
-			<a href="#"
-			style="text-decoration: none;">
-				Create an account
-			</a>
-		</p> -->
 	</div>
 </body>
 

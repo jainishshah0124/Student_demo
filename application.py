@@ -1,4 +1,4 @@
-from flask import Flask, render_template,request,g,redirect,url_for
+from flask import Flask, render_template,request,g,redirect,url_for,jsonify,session
 import requests
 import JSON
 import os
@@ -16,10 +16,11 @@ from datetime import date
 import json
 
 app = Flask(__name__)
+app.secret_key = '12345'
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('login.html')
 
 @app.route('/register')
 def register():
@@ -29,7 +30,7 @@ def register():
 def fill_class():
     print(list_classes())
     print(retrive_data(list_classes()))
-    data=json.loads(JSON.selectJSONCALL('https://us-east-2.aws.neurelo.com/rest/employees/?select={"enrollment_ref":true,"first_name":true,"last_name":true,"employee_id":true}',"",'GET').text)["data"]
+    data=json.loads(JSON.selectJSONCALL('https://us-east-2.aws.neurelo.com/rest/employees/?select={"enrollment_link_ref":true,"first_name":true,"last_name":true,"employee_id":true}',"",'GET').text)["data"]
     filtered_data = [record for record in data]
     freshData=[]
     for each in filtered_data:
@@ -137,7 +138,7 @@ def attendance():
 def retrive_data(classes):
     students_data = {}
     for each in classes:
-        student=json.loads(JSON.selectJSONCALL(f'https://us-east-2.aws.neurelo.com/rest/enrollment?filter={{"class_id":{{"contains":"{each}"}}}}',"",'GET').text)["data"]
+        student=json.loads(JSON.selectJSONCALL(f'https://us-east-2.aws.neurelo.com/rest/enrollment_link?filter={{"class_id":{{"contains":"{each}"}}}}',"",'GET').text)["data"]
         students_data[each] = []
         for eachstud in student:
             data=json.loads(JSON.selectJSONCALL('https://us-east-2.aws.neurelo.com/rest/employees/'+str(eachstud["employee_id"]),"",'GET').text)["data"]
@@ -165,25 +166,33 @@ def submit_fill_class():
             }
             data.append(temp)
     print(data)
-    response = JSON.sendJSONCALL('https://us-east-2.aws.neurelo.com/rest/enrollment',data,'POST')
+    response = JSON.sendJSONCALL('https://us-east-2.aws.neurelo.com/rest/enrollment_link',data,'POST')
     
     temp=[]
     for each in rollList:
-        if each not in checked_students:
+        if each not in checked_students and each != '':
             temp.append(int(each))
     
     data={
         "class_id":class_selected[0],
         "employee_id" : {"in":temp}
     }
-    responsedel = JSON.deleteJSONCALL(f'https://us-east-2.aws.neurelo.com/rest/enrollment?filter={json.dumps(data)}','','DELETE')
+    responsedel = JSON.deleteJSONCALL(f'https://us-east-2.aws.neurelo.com/rest/enrollment_link?filter={json.dumps(data)}','','DELETE')
     if(str(response.status_code)=='201' and str(responsedel.status_code)=='201'):
         return redirect(url_for('attendance'))
     return 'Some error occured'
 
-@app.route('/login')
+@app.route('/login',methods=['POST'])
 def login():
-    return render_template('login.html')
+    username = request.form.get('username')
+    password = request.form.get('password')
+    if username == 'admin' and password == 'admin':
+        session['username'] = username
+        return redirect('/attendance')
+    else:
+        error_message = "Invalid username or password. Please try again."
+        return render_template('login.html', error_message=error_message)
+    
 
 @app.route('/start_attendance')
 def start_attendance():
@@ -204,5 +213,60 @@ def start_attendance():
     }
     return render_template('start_attendance.html',localStorage_data=localStorage_data)
 
+def delAttendance(subject_code,attendance_data,todayDate):
+    list_enrollment=[]
+    for item in attendance_data:
+        each=int(item['rollNumber'])
+        filter_json = json.dumps({"class_id":subject_code,"employee_id":each})
+        url = f'https://us-east-2.aws.neurelo.com/rest/enrollment_link?select={{"auto_id":true}}&filter={filter_json}'
+        print(url)
+        response=json.loads(JSON.selectJSONCALL(url,"",'GET').text)["data"]
+        if response:
+            enrollment_id=response[0]["auto_id"]
+            list_enrollment.append(enrollment_id)
+            item["enrollment_id"]=enrollment_id
+    #{{URL}}/rest/attendance?filter={"date":"2024-03-30","employee_id":{"in":[12,13]}}
+    data={
+        "date":todayDate,
+        "employee_id" : {"in":list_enrollment}
+    }
+    responsedel = JSON.deleteJSONCALL(f'https://us-east-2.aws.neurelo.com/rest/attendance?filter={json.dumps(data)}','','DELETE')
+    if str(responsedel.status_code)=='201':
+        print('Records Deleted')
+    print(attendance_data)
+    return attendance_data
+
+@app.route('/submitAttendance',methods=['POST'])
+def submitAttendance():
+    data = request.json
+    attendance_data = data.get('attendanceData')
+    subject_code = data.get('attendanceClass')
+    todayDate = data.get('todayDate')
+    print(todayDate)
+    #Clear the old data with same date & same enrollment
+    attendance_data=delAttendance(subject_code,attendance_data,todayDate)
+    # Process the attendance data as needed
+    data=[]
+    for item in attendance_data:
+        temp={
+            "date":todayDate,
+            "employee_id": item['enrollment_id']
+        }
+        if(item['status']=='present'):
+            temp["status"] = "Present"
+        elif(item['status']=='leave'):
+            temp["status"] = "Late"
+        else:
+            temp["status"] = "Absent"
+        data.append(temp)
+    print(data)
+    response = JSON.sendJSONCALL('https://us-east-2.aws.neurelo.com/rest/attendance',data,'POST')
+    print(response.text)
+    return jsonify({'message': 'Data received successfully'}), 200
+
+@app.route('/calender')
+def calender():
+    return render_template('calender.html')
+
 if __name__ == '__main__':
-    app.run(debug=True,port=5001)
+    app.run(debug=True,port=5003)

@@ -25,7 +25,6 @@ def selectJSONCALL(url,data,method):
         return response
     
 def deleteJSONCALL(url,data,method):
-    print(url)
     if method=='DELETE':
         response = requests.delete(url, json=data, headers=headers)
         return response

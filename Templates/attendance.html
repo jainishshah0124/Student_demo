@@ -8,6 +8,7 @@
           content="width=device-width, initial-scale=1.0">
     <title>Student Attendance Portal</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/attendance.css') }}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 
 <body>
@@ -20,6 +21,7 @@
                 Student Attendance Portal
             </h1>
         </div>
+        <div id="liveTime" class="animate__animated animate__fadeIn"></div>
         <div class="navbar-links">
             <p>
                 Academic Year: 
@@ -38,9 +40,12 @@
         <div class="form-container">
             <div id="formSection">
                 <h2>Mark Attendance</h2>
-                <button id="startSocket">
+                <div><button id="startSocket" style="display: block;">
                     Start Socket
-                </button><br><br>
+                </button>
+                <button id="stopSocket" style="display: none;">
+                    Stop Socket
+                </button></div><br>
                 <button id="addStudentBtn">
                     Register Student
                 </button>
@@ -83,7 +88,7 @@
                     </p>
                 </div>
 
-                <button onclick="submitAttendance()">
+                <button onclick="handleRestrictedButtonClick(submitAttendance)">
                     Submit Attendance
                 </button>
 
@@ -115,7 +120,7 @@
                         <span id="attendanceAbsent"></span>
                     </p>
                     <p>
-                        Leave: 
+                        Late: 
                         <span id="attendanceLeave"></span>
                     </p>
                 </div>
@@ -153,11 +158,47 @@
         </form>
     </div>
 
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+          <span class="modal-close">&times;</span>
+          <h2>Session Password Required</h2>
+          <p>Please enter the session password:</p>
+          <input type="password" id="passwordInput">
+          <button id="submitButton">Submit</button>
+        </div>
+      </div>
+
     <script src="/static/js/attendance.js"></script>
     <script>
         const videoElement = document.getElementById("videoElement");
         const statusMessage = document.getElementById("statusMessage");
         let websocket;
+        let sendFrameInterval;
+
+        function disableEnableAllButtons(){
+            var buttons = document.querySelectorAll('button');
+            // Loop through each button and disable it
+            if(document.getElementById('startSocket').style.display=='block'){
+                document.getElementById('startSocket').style="display:none";
+                document.getElementById('stopSocket').style="display:block";
+                buttons.forEach(function(button) {
+                    if(button.id!='stopSocket' && button.id!='submitButton'){
+                        button.disabled = true;
+                    }
+                });
+                document.getElementById('classSelector').disabled=true;
+            }else{
+                websocket.close();
+                document.getElementById('startSocket').style="display:block";
+                document.getElementById('stopSocket').style="display:none";
+                buttons.forEach(function(button) {
+                    if(button.id!='stopSocket'){
+                        button.disabled = false;
+                    }
+                });
+                document.getElementById('classSelector').disabled=false;
+            }
+        }
 
         // Function to establish WebSocket connection
         function connectToWebSocket() {
@@ -200,6 +241,7 @@
             // Event handler for when the WebSocket connection is closed
             websocket.onclose = function(event) {
                 console.log("WebSocket connection closed.");
+                clearInterval(sendFrameInterval);
             };
         }
 
@@ -255,9 +297,27 @@
             });
             document.getElementById('startSocket').addEventListener('click', function() {
                 connectToWebSocket();
+                disableEnableAllButtons();
                 // Repeat sending frames to server every 5 seconds
-                setInterval(sendFrameToServer, 2000);
+                sendFrameInterval=setInterval(sendFrameToServer, 2000);
             });
+            document.getElementById('stopSocket').addEventListener('click', function() {
+                handleRestrictedButtonClick(disableEnableAllButtons);
+            });
+            function updateLiveTime() {
+                var now = new Date();
+                var hours = now.getHours().toString().padStart(2, '0');
+                var minutes = now.getMinutes().toString().padStart(2, '0');
+                var seconds = now.getSeconds().toString().padStart(2, '0');
+                var currentTime = hours + ":" + minutes + ":" + seconds;
+                document.getElementById("liveTime").textContent = currentTime;
+            }
+
+            // Update the live time initially
+            updateLiveTime();
+
+            // Update the live time every second
+            setInterval(updateLiveTime, 1000);
         };
 
     </script>

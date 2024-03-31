@@ -6,6 +6,7 @@ body {
 }
 
 .navbar {
+
     background-color: #2c3e50;
     color: white;
     padding: 6px;
@@ -15,10 +16,12 @@ body {
 }
 
 .navbar-brand {
+    flex: 1;
     font-size: 18px;
 }
 
 .navbar-links {
+    
     display: flex;
 }
 
@@ -232,3 +235,65 @@ button:hover {
 .highlight {
     animation: highlight 1.5s ease;
 }
+
+/* CSS for the modal */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  }
+  
+  /* Modal content */
+  .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 50%; /* Could be more or less, depending on screen size */
+  }
+  
+  /* Close button */
+  .modal-close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+  
+  .modal-close:hover,
+  .modal-close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .incorrect-password {
+    border: 1px solid red; /* Change border color to red */
+  }
+
+  #liveTime {
+    flex: 1;
+    font-size: 40px;
+    font-weight: bold;
+    background: linear-gradient(to right, #ff8a00, #e52e71); /* Gradient text color */
+    -webkit-background-clip: text; /* Apply gradient only to text */
+    background-clip: text; /* Apply gradient only to text */
+    animation: fadeIn 2s ease; /* Fade-in animation */
+    animation-fill-mode: forwards; /* Maintain the last keyframe state after animation */
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+  

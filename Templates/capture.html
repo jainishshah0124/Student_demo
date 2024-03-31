@@ -23,7 +23,7 @@
                         
                         <button id="captureButton">Capture Image</button>
                         <button id="reTakeBtn" style="display: none;">Retake Image</button>
-                            <form id="imageForm"  style="display: none;min-height: 20px;" action="/save_image" method="post">
+                            <form id="imageForm" onsubmit="handleFormSubmission(event,'popupregFrame','imageForm')" style="display: none;min-height: 20px;" action="/save_image" method="post">
                                 <input type="hidden" id="imageData" name="imageData">
                                 <input type="hidden" id="employee_id" name="employee_id" value="{{employee_id}}">
                             <button type="submit">Save Image</button>

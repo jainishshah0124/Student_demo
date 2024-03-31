@@ -57,7 +57,7 @@
         localStorage.setItem('localStorageData', JSON.stringify(localStorageData));
         // Retrieve localStorageData from localStorage
         const retrievedData = JSON.parse(localStorage.getItem('localStorageData'));
-        document.getElementById('localStorageData').value = retrievedData;
+        //document.getElementById('localStorageData').value = retrievedData;
         console.log(retrievedData); 
 
         document.addEventListener("DOMContentLoaded",
@@ -109,6 +109,7 @@
 
                 const checkedStud = studentsData[selectedClass] || [];
                 var rollNumbersList = checkedStud.map(student => student.rollNumber);
+                document.getElementById('localStorageData').value=rollNumbersList;
                 const savedStudents = localStorageData['toAssignstud'] || [];
                 savedStudents.forEach(classname => {
                         if(rollNumbersList.includes(classname[2])){
@@ -122,7 +123,7 @@
     </script>
 <div class="container">
     <h1>Select Students</h1>
-    <form id="studentForm" onsubmit="parent.handleFormSubmission(event)" action="/submit_fill_class" method="post">
+    <form id="studentForm" onsubmit="parent.handleFormSubmission(event,'popupFrame','studentForm')" action="/submit_fill_class" method="post">
     <label for="classSelector">Class:</label>
                 <select id="classSelector" required name="classSelector"
                     onchange="createCheckboxstart()">

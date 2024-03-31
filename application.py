@@ -153,19 +153,32 @@ def retrive_data(classes):
 def submit_fill_class():
     class_selected=request.form.getlist('classSelector')
     checked_students = request.form.getlist('students')
+    rollList = request.form.getlist('localStorageData')[0].split(',')
+    print(rollList)
+    print(checked_students)
     data=[]
     for each in checked_students:
-        temp={
+        if each not in rollList:
+            temp={
             "class_id":class_selected[0],
             "employee_id":int(each)
-        }
-        data.append(temp)
+            }
+            data.append(temp)
     print(data)
-    # response = JSON.sendJSONCALL('https://us-east-2.aws.neurelo.com/rest/enrollment',data,'POST')
-    # # Print the response
-    # print('response status code : ' + str(response.status_code))
-    # if(str(response.status_code)=='201'):
-    #     return redirect(url_for('attendance'))
+    response = JSON.sendJSONCALL('https://us-east-2.aws.neurelo.com/rest/enrollment',data,'POST')
+    
+    temp=[]
+    for each in rollList:
+        if each not in checked_students:
+            temp.append(int(each))
+    
+    data={
+        "class_id":class_selected[0],
+        "employee_id" : {"in":temp}
+    }
+    responsedel = JSON.deleteJSONCALL(f'https://us-east-2.aws.neurelo.com/rest/enrollment?filter={json.dumps(data)}','','DELETE')
+    if(str(response.status_code)=='201' and str(responsedel.status_code)=='201'):
+        return redirect(url_for('attendance'))
     return 'Some error occured'
 
 @app.route('/login')

@@ -26,12 +26,12 @@ function showlinkStudentForm() {
     popup.style.display = 'block';
 }
 
-function handleFormSubmission(event) {
+function handleFormSubmission(event,iframe_name,form_name) {
     event.preventDefault(); // Prevent the default form submission behavior
 
     // Get the form element from the iframe
-    var iframe = document.getElementById('popupFrame');
-    var form = iframe.contentWindow.document.getElementById('studentForm');
+    var iframe = document.getElementById(iframe_name);
+    var form = iframe.contentWindow.document.getElementById(form_name);
     //imageForm
 
     if(form==null){
@@ -46,8 +46,10 @@ function handleFormSubmission(event) {
     closePopup();
 
     // Redirect the whole page
-    window.location.href = '/submit_fill_class';
+    window.location.href = '/attendance';
 }
+
+
 
 function showAddClassForm() {
     var popup = document.getElementById('addClassPopup');

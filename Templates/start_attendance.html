@@ -26,29 +26,12 @@
 </head>
 
 <body>
-    <script>
-        const localStorageData = {{ localStorage_data | tojson | safe }};
-    </script>
-    <div class="navbar">
-        <div class="navbar-brand">
-            <h1> 
-                Student Attendance Portal
-            </h1>
-        </div>
-        <div class="navbar-links">
-            <p>
-                Academic Year: 
-                <span id="academicYear">2024</span>
-            </p>
-            <!-- Add other relevant information -->
-        </div>
-    </div>
 
     <div class="container">
         
         <div class="form-container">
             <div id="formSection">
-                <h2>Mark Attendance</h2>
+                <h2>Marked Attendance</h2>
                 <!-- <button id="addStudentButton" 
                     onclick="showAddStudentForm()">
                     Add Student
@@ -87,10 +70,6 @@
                         <span id="totalLeave">0</span>
                     </p>
                 </div>
-
-                <button onclick="submitAttendance()">
-                    Submit Attendance
-                </button>
 
                 <!-- Result Section -->
                 <div id="resultSection" style="display: none;">

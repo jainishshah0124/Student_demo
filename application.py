@@ -264,9 +264,18 @@ def submitAttendance():
     print(response.text)
     return jsonify({'message': 'Data received successfully'}), 200
 
-@app.route('/calender')
-def calender():
-    return render_template('calender.html')
+@app.route('/calendar')
+def calendar():
+    return render_template('cal.html')
+
+@app.route('/retriveAttendanceSummary',methods=['POST'])
+def retriveAttendanceSummary():
+    data = request.json
+    subject=str(data.get('subject_code'))
+    data=json.loads(JSON.selectJSONCALL(f'https://us-east-2.aws.neurelo.com/custom/attendance_count_summary?subject_code="{subject}"',"",'GET').text)["data"]
+    
+    print(data)
+    return data
 
 if __name__ == '__main__':
     app.run(debug=True,port=5003)

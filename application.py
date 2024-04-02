@@ -1,23 +1,10 @@
 from flask import Flask, render_template,request,g,redirect,url_for,jsonify,session,Response
-from cryptography.fernet import Fernet
-import requests
 import JSON
-import os
-import cv2
-import numpy
-import shutil
-import pyttsx3
-import argparse
-import threading
-import face_recognition
-from imutils import paths
-from playsound import playsound
 import base64
 from datetime import date
 import json
 
 app = Flask(__name__)
-app.secret_key = '12345'
 
 @app.route('/')
 def index():

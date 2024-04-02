@@ -8,6 +8,9 @@
           content="width=device-width, initial-scale=1.0">
     <title>Student Attendance Portal</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/attendance.css') }}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk"
+        crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
     <style>
         .popup {
             display: none;
@@ -26,26 +29,10 @@
 </head>
 
 <body>
-
     <div class="container">
-        
         <div class="form-container">
             <div id="formSection">
                 <h2>Marked Attendance</h2>
-                <!-- <button id="addStudentButton" 
-                    onclick="showAddStudentForm()">
-                    Add Student
-                </button>
-                <button id="addClassButton" 
-                    onclick="showAddClassForm()">
-                    Add Class
-                </button> -->
-
-                <label for="classSelector">Class:</label>
-                <select id="classSelector" required 
-                    onchange="showStudentsList()">
-                    <!-- Populate classes dynamically -->
-                </select>
                 <ul id="studentsList">
                     <!-- Populate students dynamically 
                         based on the selected class -->
@@ -105,47 +92,84 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <div id="addStudentPopup" class="popup">
-        <h2>Add Student</h2>
-        <!-- Add Student Form Content -->
-        <label for="newStudentName">
-            Student Name:
-        </label>
-        <input type="text" id="newStudentName" required>
-        <label for="newStudentRoll">
-            Roll Number:
-        </label>
-        <input type="text" id="newStudentRoll" required>
-        <!-- Add more fields as needed -->
-
-        <button onclick="addStudent()">
-            submit
-        </button>
-        <button onclick="closePopup()">
-            Cancel
-        </button>
-    </div>
-
-    <div id="addClassPopup" class="popup">
-        <h2>Add Class</h2>
-        <!-- Add Class Form Content -->
-        <label for="newClassName">
-            Class Name:
-        </label>
-        <input type="text" id="newClassName" required>
-        <!-- Add more fields as needed -->
-
-        <button onclick="addClass()">
-            Submit
-        </button>
-        <button onclick="closePopup()">
-            Cancel
-        </button>
+        <pre id="json" style="display: none;"></pre>
+            <button class="btn btn-primary" onclick="downloadAsExcel()">download excel</button>
     </div>
 
     <script src="/static/js/attendance.js"></script>
+    <script src="/static/js/json-excel.js"></script>
+    <script>
+        function retriveStudentList(){
+            const selectedClass = localStorage.getItem('attendanceClass');
+            const selectDate = localStorage.getItem('clickedBtn');
+            const studentsList =
+                document.getElementById('studentsList');
+            studentsList.innerHTML = '';
+            // Retrieve students from local storage
+            const savedStudents = JSON.parse
+                (localStorage.getItem('students')) || {};
+                
+            const selectedClassStudents = [];
+            fetch('https://us-east-2.aws.neurelo.com/rest/attendance?select={"enrollment_link_ref":{"employees_ref": {"first_name":true,"last_name":true,"employee_id":true}},"status":true}&filter={"date":"'+selectDate+'","enrollment_link_ref":{"class_id":"'+selectedClass+'"}}&order_by=[{"enrollment_link_ref":{"employees_ref":{"employee_id":"asc"}}}]', {
+                method: 'GET',
+                headers: {
+                    'X-API-Key': 'neurelo_9wKFBp874Z5xFw6ZCfvhXdrIxbYidUfYmprDJks1tK7y+CdPciG0qgAl1exw69RQYdQYxvqcRG1GgVajqZknUzwW3VIC3xEqNyynTa2l6w7oNlrUhKRqRwBMMl8+7AZa47Yep4FXq3GDsvF4EEl8V0KoyaErzYwNp/1UgzVKPIIJ0g4CU0FZ7DttiyrVmTey_QQJSGjZU26OLFcPkkURgzkUzltgQryhI0R5NRDB76x4=',
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    for (var i = 0; i < data.data.length; i++) {
+                        let temp = {
+                            name: data.data[i].enrollment_link_ref.employees_ref.first_name + " " + data.data[i].enrollment_link_ref.employees_ref.last_name,
+                            rollNumber: data.data[i].enrollment_link_ref.employees_ref.employee_id,
+                            status:data.data[i].status.toLowerCase()
+                        }
+                        selectedClassStudents.push(temp);
+                    }
+                    document.getElementById("json").innerHTML = JSON.stringify(selectedClassStudents, undefined, 4);
+                    insertStudents(selectedClassStudents);
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                });
+            }
+
+            function insertStudents(selectedClassStudents){
+                selectedClassStudents.forEach(student => {
+                    if (student.name == undefined)
+                        return;
+                    const listItem = document.createElement('li');
+                    listItem.setAttribute
+                        ('data-roll-number', student.rollNumber);
+                    listItem.innerHTML =
+                        `<strong>
+                            ${student.name}
+                        </strong> <div style="flex:1;"><b>${student.status.toUpperCase()}</b></div>
+                        (Roll No. ${student.rollNumber})`;
+                    
+                    listItem.style.backgroundColor = getStatusColor(student.status);
+
+                    studentsList.appendChild(listItem);
+                });
+
+                // Check if attendance for the 
+                // selected class has been submitted
+                const resultSection = document.
+                    getElementById('resultSection');
+                const isAttendanceSubmitted =
+                    resultSection.style.display === 'block';
+                document.getElementById('totalStudents').innerText = JSON.parse(localStorage.getItem('summary')).total;
+                document.getElementById('totalPresent').innerText = JSON.parse(localStorage.getItem('summary')).present;
+                document.getElementById('totalAbsent').innerText = JSON.parse(localStorage.getItem('summary')).absent;
+                document.getElementById('totalLeave').innerText = JSON.parse(localStorage.getItem('summary')).late;
+            }
+    </script>
 </body>
 
 </html>

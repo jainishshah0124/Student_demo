@@ -1,4 +1,5 @@
-from flask import Flask, render_template,request,g,redirect,url_for,jsonify,session
+from flask import Flask, render_template,request,g,redirect,url_for,jsonify,session,Response
+from cryptography.fernet import Fernet
 import requests
 import JSON
 import os
@@ -24,12 +25,13 @@ def index():
 
 @app.route('/register')
 def register():
+    if 'username' not in session:
+            error_message = "Please Login"
+            return render_template('login.html', error_message=error_message)
     return render_template('registration.html')
 
 @app.route('/fill_class')
 def fill_class():
-    print(list_classes())
-    print(retrive_data(list_classes()))
     data=json.loads(JSON.selectJSONCALL('https://us-east-2.aws.neurelo.com/rest/employees/?select={"enrollment_link_ref":true,"first_name":true,"last_name":true,"employee_id":true}',"",'GET').text)["data"]
     filtered_data = [record for record in data]
     freshData=[]
@@ -40,13 +42,24 @@ def fill_class():
         temp.append(each['employee_id'])
         freshData.append(temp)
 
+    classes=list_classes()
+    listclass=[]
+    listTime=[]
+    i=0
+    for each in classes:
+        if i%2==0:
+            listclass.append(each)
+        else:
+            listTime.append(each)
+        i=i+1
     #print(freshData)
     localStorage_data = {
-        "classes": list_classes(),
+        "classes": listclass,
         "colors": '{}',
         "debug": "honey:core-sdk:*",
         "students": json.dumps(retrive_data(list_classes())),
-        "toAssignstud" : freshData
+        "toAssignstud" : freshData,
+        "listTime":json.dumps(listTime)
     }
     print(localStorage_data)
     return render_template('fill_class.html',localStorage_data=localStorage_data)
@@ -119,17 +132,31 @@ def list_classes():
     classes=[]
     for dtl in class_dtl:
         classes.append(dtl["subject_code"])
+        classes.append(dtl["start_time"])
     return classes
 
 @app.route('/attendance')
 def attendance():
-    
+    if 'username' not in session:
+            error_message = "Please Login"
+            return render_template('login.html', error_message=error_message)
+    classes=list_classes()
+    listclass=[]
+    listTime=[]
+    i=0
+    for each in classes:
+        if i%2==0:
+            listclass.append(each)
+        else:
+            listTime.append(each)
+        i=i+1
     localStorage_data = {
         "attendanceData": '[]',
-        "classes": json.dumps(list_classes()),
+        "classes": json.dumps(listclass),
         "colors": '{}',
         "debug": "honey:core-sdk:*",
-        "students": json.dumps(retrive_data(list_classes()))
+        "students": json.dumps(retrive_data(listclass)),
+        "listTime":json.dumps(listTime)
     }
 
     return render_template('attendance.html',localStorage_data=localStorage_data)
@@ -177,6 +204,7 @@ def submit_fill_class():
         "class_id":class_selected[0],
         "employee_id" : {"in":temp}
     }
+    print(json.dumps(data))
     responsedel = JSON.deleteJSONCALL(f'https://us-east-2.aws.neurelo.com/rest/enrollment_link?filter={json.dumps(data)}','','DELETE')
     if(str(response.status_code)=='201' and str(responsedel.status_code)=='201'):
         return redirect(url_for('attendance'))
@@ -192,6 +220,13 @@ def login():
     else:
         error_message = "Invalid username or password. Please try again."
         return render_template('login.html', error_message=error_message)
+    
+@app.route('/logout')
+def logout():
+    # Clear the session data
+    session.clear()
+    # Redirect the user to the login page
+    return redirect('/')
     
 
 @app.route('/start_attendance')
@@ -266,7 +301,16 @@ def submitAttendance():
 
 @app.route('/calendar')
 def calendar():
+    if 'username' not in session:
+            error_message = "Please Login"
+            return render_template('login.html', error_message=error_message)
     return render_template('cal.html')
+
+@app.route('/favicon.ico')
+def favicon():
+    # Return an empty response with status code 204 (No Content)
+    return Response(status=204)
+
 
 @app.route('/retriveAttendanceSummary',methods=['POST'])
 def retriveAttendanceSummary():
@@ -276,6 +320,11 @@ def retriveAttendanceSummary():
     
     print(data)
     return data
+
+@app.route('/api',methods=['POST','GET'])
+def api():
+
+    return ''
 
 if __name__ == '__main__':
     app.run(debug=True,port=5003)

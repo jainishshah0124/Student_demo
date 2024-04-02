@@ -45,7 +45,6 @@ h2 {
 
 label {
     margin-top: 10px;
-    display: block;
 }
 
 select {
@@ -296,4 +295,44 @@ button:hover {
         opacity: 1;
     }
 }
+#clock {
+    flex: 0.9;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.5vw;
+    background-image: linear-gradient(180deg,
+        rgba(99,253,136,1) 0%,
+        rgba(51,197,142,1) 50%,
+        rgba(39,97,116,1) 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -moz-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    -moz-text-fill-color: transparent;
+}
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.loader {
+    border: 16px solid #f3f3f3;
+    border-top: 16px solid #3498db;
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
   

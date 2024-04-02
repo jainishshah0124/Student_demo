@@ -1,11 +1,4 @@
 //script.js
-document.addEventListener("DOMContentLoaded",
-    function () {
-        data();
-        populateClasses();
-        showStudentsList();
-    });
-
 function data() {
     debugger;
     for (const [key, value] of Object.entries(localStorageData)) {
@@ -84,6 +77,7 @@ function addStudent() {
         `<strong>
             ${newStudentName}
         </strong> 
+        <div class="status" style="flex-grow:1;font-size:large;font-weight:bolder;color:darkblue;"></div>
         (Roll No. ${newStudentRoll})`;
 
     const absentButton =
@@ -307,6 +301,7 @@ function populateClasses() {
 }
 
 function showStudentsList() {
+    document.getElementById('classTime').innerHTML='Class Timings:' + JSON.parse(localStorage.getItem('listTime'))[JSON.parse(localStorage.getItem('classes')).indexOf(document.getElementById('classSelector').value)];
     localStorage.removeItem('attendanceData');
     localStorage.removeItem('colors');
     const classSelector =
@@ -334,6 +329,7 @@ function showStudentsList() {
             `<strong>
                 ${student.name}
             </strong> 
+            <div class="status" style="flex-grow:1;font-size:large;font-weight:bolder;color:darkblue;"></div>
             (Roll No. ${student.rollNumber})`;
 
         const absentButton = createButton('A', 'absent',
@@ -466,6 +462,8 @@ function getStatusColor(status) {
         case 'present':
             return '#2ecc71';
         case 'leave':
+            return '#f39c12';
+        case 'late':
             return '#f39c12';
         default:
             return '';
@@ -607,41 +605,16 @@ function handleRestrictedButtonClick(callingLogic) {
     // Get the modal
     var modal = document.getElementById("myModal");
   
-    // Get the password input field
-    var passwordInput = document.getElementById("passwordInput");
-  
     // Show the modal
     modal.style.display = "block";
   
-    // Function to handle submit button click
-    function handleSubmitButtonClick() {
-      var password = passwordInput.value;
-      // Check if password is correct (e.g., compare with session password)
-      if (password === "admin") {
-        modal.style.display = "none";
-        passwordInput.value="";
-        callingLogic();
-      } else {
-        console.log("Incorrect password");
-        // Highlight the input field to indicate incorrect password
-        passwordInput.classList.add('incorrect-password');
-        var modalContent = document.getElementsByClassName("modal-content")[0];
-        // display an error message
-        var errorMessage = document.createElement('p');
-        errorMessage.textContent = 'Incorrect password. Please try again.';
-        errorMessage.classList.add('error-message');
-        modalContent.appendChild(errorMessage);
-        // clear password input field after a delay
-        setTimeout(function() {
-            passwordInput.value = "";
-            passwordInput.classList.remove('incorrect-password');
-            errorMessage.remove();
-            }, 2000); // Change delay as needed
-        }
-    }
-  
     // Handle submit button click
-    document.getElementById("submitButton").addEventListener("click", handleSubmitButtonClick);
+    var submitButton = document.getElementById("submitButton");
+    var existingListeners = submitButton.cloneNode(true);
+    submitButton.parentNode.replaceChild(existingListeners, submitButton);
+    document.getElementById("submitButton").addEventListener("click", function() {
+        handleSubmitButtonClick(callingLogic);
+    });
         var closeButton = document.getElementsByClassName("modal-close")[0];
     closeButton.onclick = function() {
         modal.style.display = "none";
@@ -655,5 +628,31 @@ function handleRestrictedButtonClick(callingLogic) {
     };
 
   }
-  
 
+  function handleSubmitButtonClick(callingLogic) {
+    var modal = document.getElementById("myModal");
+    // Get the password input field
+    var password = document.getElementById("passwordInput").value;
+    // Check if password is correct (e.g., compare with session password)
+    if (password === "admin") {
+      modal.style.display = "none";
+      passwordInput.value="";
+      callingLogic();
+    } else {
+      console.log("Incorrect password");
+      // Highlight the input field to indicate incorrect password
+      passwordInput.classList.add('incorrect-password');
+      var modalContent = document.getElementsByClassName("modal-content")[0];
+      // display an error message
+      var errorMessage = document.createElement('p');
+      errorMessage.textContent = 'Incorrect password. Please try again.';
+      errorMessage.classList.add('error-message');
+      modalContent.appendChild(errorMessage);
+      // clear password input field after a delay
+      setTimeout(function() {
+          passwordInput.value = "";
+          passwordInput.classList.remove('incorrect-password');
+          errorMessage.remove();
+          }, 2000); // Change delay as needed
+      }
+  }

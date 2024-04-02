@@ -17,6 +17,11 @@ const renderCalendar = () => {
 
   document.querySelector(".month h1").innerHTML = months[date.getMonth()];
   document.querySelector(".month p").innerHTML = new Date().toDateString();
+  var temp=parseInt(date.getMonth()+1);
+  if(temp<10){
+    temp="0"+temp;
+  }
+  localStorage.setItem('currMonYear',date.getFullYear()+"-"+temp);
 
   let days = "";
 
@@ -35,7 +40,7 @@ const renderCalendar = () => {
   }
   for (let i = 1; i <= lastDay; i++) {
     if(totalDays.includes(i)){
-        days += `<div class="highlighted">${i}</div>`;
+        days += `<div class="highlighted" onClick="onPopup(${i})">${i}</div>`;
     }else{
         days += `<div>${i}</div>`;
     }
@@ -50,7 +55,7 @@ const renderCalendar = () => {
 
   dayElements.forEach(dayElement => {
     dayElement.addEventListener("mouseenter", () => {
-        const day = dayElement.innerText;
+        var day = dayElement.innerText;
         const month = months[date.getMonth()];
         const year = date.getFullYear();
         var mon;
@@ -59,6 +64,9 @@ const renderCalendar = () => {
         }
         else{
             mon=date.getMonth()+1;
+        }
+        if(day<10){
+            day='0'+day;
         }
         mon=year+'-'+mon+'-'+day;
         var present=0;var late=0;var absent=0;var total=0;
@@ -77,14 +85,14 @@ const renderCalendar = () => {
             }
           }
       total=present+late+absent;
+      let temp1={total:total,present:present,absent:absent,late:late}
+      localStorage.setItem('summary',JSON.stringify(temp1));
       if(total>0){
-        const info = `Total Students: ${total} | 
-        Present: ${present} | 
-        Absent: ${absent} | Late: ${late}`;
+        const info = `Total Students: ${total} | Present: ${present} | Absent: ${absent} | Late: ${late}`;
         infoContainer.innerText = info;
       }
       
-    });
+    });  
     dayElement.addEventListener("mouseleave", () => {
         infoContainer.innerText = "";
       });  
@@ -103,10 +111,6 @@ document.querySelector(".next").addEventListener("click", () => {
 
 window.onload = function() {
     const display = document.getElementById('clock');
-    const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3');
-    audio.loop = true;
-    let alarmTime = null;
-    let alarmTimeout = null;
 
     function updateTime() {
         const date = new Date();
@@ -167,3 +171,36 @@ document.addEventListener("DOMContentLoaded",
         populateClasses();
         callMethod();
     });
+
+function onPopup(day){
+    localStorage.setItem('attendanceClass',document.getElementById("classSelector").value);
+    if(day<10){
+        day='0'+day;
+    }
+    localStorage.setItem('clickedBtn',localStorage.getItem("currMonYear")+"-"+day);
+    var popup = document.getElementById('linkStudentPopup');
+    popup.classList.add('fade-in'); // Add class to trigger fade-in animation
+    popup.classList.remove('fade-out');
+    popup.style.display = 'block';
+    document.getElementById('popupFrame').contentWindow.retriveStudentList();
+}
+function closePopup() {
+    // Close the currently open popup
+    var popupIds = ['linkStudentPopup'];
+
+    // Loop through each popup ID
+    popupIds.forEach(function (id) {
+        var popup = document.getElementById(id);
+
+        // Add fade-out animation class
+        popup.classList.add('fade-out');
+
+        // Hide the popup after animation completes
+        setTimeout(function () {
+            popup.style.display = 'none';
+        }, 500); // Duration of fade-out animation
+
+        // Remove fade-in class
+        popup.classList.remove('fade-in');
+    });
+}

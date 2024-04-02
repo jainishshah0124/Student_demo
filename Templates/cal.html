@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Calendar</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css"
@@ -15,14 +16,23 @@
     />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/attendance-calendar.min.css') }}">
   </head>
-  <body>
+  <body id="main">
     <div class="navbar">
         <div class="navbar-brand">
             <h1> 
                 Student Attendance Portal
             </h1>
         </div>
+        <div>
+            
+        </div>
         <div id="clock"></div>
+        <div>
+            <button id="back" onclick="window.location.href='/attendance'">Back
+            </button>
+            <button id="logout" style="background-color: red;" onclick="window.location.href='/logout'">Logout
+            </button>
+        </div>
         <div class="navbar-links">
             <p>
                 Academic Year: 
@@ -61,7 +71,10 @@
         <p class="info"></p>
         </div>
     </div>
+    <div id="linkStudentPopup" class="popup" style="width: 80vw;height: 60vh;">
+        <button class="popup-close" onclick="closePopup()">Close</button>
+        <iframe src="/start_attendance" id="popupFrame"></iframe>
+      </div>
     <script src="/static/js/attendance-calendar.js"></script>
-    
   </body>
 </html>

@@ -34,7 +34,6 @@ async def handle_websocket(websocket, path):
     face_locations = []
     face_encodings = []
     face_names = []
-
     while True:
         # Receive frame data from client
         frame_data = await websocket.recv()

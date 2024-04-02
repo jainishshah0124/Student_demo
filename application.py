@@ -5,6 +5,7 @@ from datetime import date
 import json
 
 app = Flask(__name__)
+app.secret_key = '12345'
 
 @app.route('/')
 def index():
@@ -12,9 +13,6 @@ def index():
 
 @app.route('/register')
 def register():
-    if 'username' not in session:
-            error_message = "Please Login"
-            return render_template('login.html', error_message=error_message)
     return render_template('registration.html')
 
 @app.route('/fill_class')
@@ -111,7 +109,7 @@ def save_image():
     with open(f'{path}.jpg', 'wb') as f:
         f.write(decoded_data)
     print(JSON.updateJSONCALL('https://us-east-2.aws.neurelo.com/rest/employees/'+employee_id,{"photo_path":path+".jpg","is_dataset_avaliable": "Y"},'PATCH').text)
-    return redirect(url_for('attendance'))
+    return redirect('/attendance')
 
 def list_classes():
     class_dtl=json.loads(JSON.selectJSONCALL('https://us-east-2.aws.neurelo.com/rest/class_details/',"",'GET').text)["data"]

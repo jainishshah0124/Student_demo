@@ -2,3 +2,6 @@ flask
 requests
 websockets
 pillow
+face_recognition
+numpy
+opencv-python

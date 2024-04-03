@@ -48,7 +48,7 @@
 
         // Function to establish WebSocket connection
         function connectToWebSocket() {
-            websocket = new WebSocket("ws://localhost:8765");  // Adjust the WebSocket server URL and port
+            websocket = new WebSocket("ws://localhost:8766");  // Adjust the WebSocket server URL and port
 
             // Event handler for when the WebSocket connection is opened
             websocket.onopen = function(event) {

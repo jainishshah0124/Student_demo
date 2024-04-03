@@ -22,6 +22,8 @@ async def handle_websocket(websocket, path):
     #retrive Data
     data=json.loads(JSON.selectJSONCALL('https://us-east-2.aws.neurelo.com/rest/employees/',"",'GET').text)["data"]
     for dtl in data:
+        if(dtl["photo_path"]==''):
+            continue
         img = face_recognition.load_image_file(dtl["photo_path"])
         face_encoding = face_recognition.face_encodings(img)[0]
         known_face_encodings.append(face_encoding)
@@ -71,7 +73,7 @@ async def handle_websocket(websocket, path):
             await websocket.send(name)
             name="Unknown"
 
-start_server = websockets.serve(handle_websocket, "localhost", 8765)
+start_server = websockets.serve(handle_websocket, "localhost", 8766)
 
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()

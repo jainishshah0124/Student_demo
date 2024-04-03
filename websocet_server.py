@@ -22,8 +22,6 @@ async def handle_websocket(websocket, path):
     #retrive Data
     data=json.loads(JSON.selectJSONCALL('https://us-east-2.aws.neurelo.com/rest/employees/',"",'GET').text)["data"]
     for dtl in data:
-        print('below details')
-        print(dtl["photo_path"])
         img = face_recognition.load_image_file(dtl["photo_path"])
         face_encoding = face_recognition.face_encodings(img)[0]
         known_face_encodings.append(face_encoding)
@@ -68,9 +66,8 @@ async def handle_websocket(websocket, path):
             best_match_index = np.argmin(face_distances)
             if matches[best_match_index]:
                 name = known_face_names[best_match_index]
-
-            face_names.append(name)
             print(name)
+            face_names.append(name)
             await websocket.send(name)
             name="Unknown"
 

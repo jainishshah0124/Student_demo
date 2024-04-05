@@ -2,6 +2,7 @@ flask
 requests
 websockets
 pillow
+cmake
 face_recognition
 numpy
 opencv-python

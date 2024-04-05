@@ -1,3 +1,4 @@
+cmake
 flask
 requests
 websockets

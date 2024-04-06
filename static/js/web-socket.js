@@ -48,7 +48,8 @@
 
         // Function to establish WebSocket connection
         function connectToWebSocket() {
-            websocket = new WebSocket("ws://localhost:8767");  // Adjust the WebSocket server URL and port
+            const dockerContainerIP = '127.0.0.1';
+            websocket = new WebSocket(`ws://${dockerContainerIP}:8767`);  // Adjust the WebSocket server URL and port
 
             // Event handler for when the WebSocket connection is opened
             websocket.onopen = function(event) {

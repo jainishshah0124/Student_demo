@@ -3,6 +3,16 @@
 FROM python:3.10.3-slim-bullseye
 FROM dataocean42/face_recognition:pi
 
+ENV APP_DIR=/root/Attendance_system
+ENV VIRTUAL_ENV=/root/Attendance_system/venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+RUN apt-get update && \
+    apt-get install -y nano && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+
 # RUN apt-get -y update
 # RUN apt-get install -y --fix-missing \
 #     build-essential \
@@ -42,19 +52,30 @@ FROM dataocean42/face_recognition:pi
 #     pip3 install -r requirements.txt
 # RUN whatever_command_you_run_to_start_your_app
 
-COPY . /root/Attendance_system
-RUN cd /root/Attendance_system && \
-    pip3 install -r requirements.txt
+WORKDIR $APP_DIR
 
-WORKDIR /root/Attendance_system
+# Copy the Flask application files
+COPY . $APP_DIR
+
+# Set up Python virtual environment
+RUN python3 -m venv $VIRTUAL_ENV
 
 RUN export NEURELO_API_KEY="neurelo_9wKFBp874Z5xFw6ZCfvhXdrIxbYidUfYmprDJks1tK7y+CdPciG0qgAl1exw69RQYdQYxvqcRG1GgVajqZknUzwW3VIC3xEqNyynTa2l6w7oNlrUhKRqRwBMMl8+7AZa47Yep4FXq3GDsvF4EEl8V0KoyaErzYwNp/1UgzVKPIIJ0g4CU0FZ7DttiyrVmTey_QQJSGjZU26OLFcPkkURgzkUzltgQryhI0R5NRDB76x4="
 
 
-ENTRYPOINT [ "python3" ]
+RUN pip install --no-cache-dir gunicorn flask
 
-# # CMD ["websocet_server.py" ]
-CMD ["application.py"]
+# Expose the port on which your Flask app will run
+EXPOSE 8000
+
+# Start your Flask application using Gunicorn
+CMD ["gunicorn", "-b", "0.0.0.0:8000", "app:app"]
+
+
+# ENTRYPOINT [ "python3" ]
+
+# # # CMD ["websocet_server.py" ]
+# CMD ["application.py"]
 
 # ENV FLASK_APP=application.py
 

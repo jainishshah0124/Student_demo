@@ -7,9 +7,9 @@ ENV APP_DIR=/root/Attendance_system
 ENV VIRTUAL_ENV=/root/Attendance_system/venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-RUN yum update && \
-    yum install -y nano && \
-    yum clean && \
+RUN apt-get update && \
+    apt-get install -y nano && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 

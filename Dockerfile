@@ -7,9 +7,9 @@ ENV APP_DIR=/root/Attendance_system
 ENV VIRTUAL_ENV=/root/Attendance_system/venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-RUN apt-get update && \
-    apt-get install -y nano && \
-    apt-get clean && \
+RUN sudo apt-get update && \
+    sudo apt-get install -y nano && \
+    sudo apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 

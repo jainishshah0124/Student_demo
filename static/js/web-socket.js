@@ -34,7 +34,18 @@
                 });
                 document.getElementById('classSelector').disabled=true;
             }else{
-                websocket.close();
+                //websocket.close();
+                clearInterval(sendFrameInterval);
+                document.querySelectorAll('li').forEach(function(temp) {
+                    // Do something with each 'li' element
+                    if(temp.attributes.style==undefined){
+                        var rollNumber=temp.dataset.rollNumber;
+                        const button = document.querySelector(`li[data-roll-number="${rollNumber}"] button.absent`);
+                        button.click();
+                        receiveMessageFromWebSocket(rollNumber,'Absent Marked');
+                        console.log(rollNumber); 
+                    }
+                });
                 document.getElementById('startSocket').style="display:block";
                 document.getElementById('stopSocket').style="display:none";
                 buttons.forEach(function(button) {
@@ -54,8 +65,9 @@
             // Event handler for when the WebSocket connection is opened
             websocket.onopen = function(event) {
                 console.log("WebSocket connection established.");
-                var dbTime=addMinutesToTime(JSON.parse(localStorage.getItem('listTime'))[JSON.parse(localStorage.getItem('classes')).indexOf(document.getElementById('classSelector').value)].toString(),parseInt(document.getElementById('bufferTime').value));
+                
                 websocket.onmessage = function(event) {
+                    var dbTime=addMinutesToTime(JSON.parse(localStorage.getItem('listTime'))[JSON.parse(localStorage.getItem('classes')).indexOf(document.getElementById('classSelector').value)].toString(),parseInt(document.getElementById('bufferTime').value));
                     const rollNumber=event.data;
                     if(document.querySelector(`li[data-roll-number="${rollNumber}"]`).style.backgroundColor==''){
                         var curr=document.getElementById('clock').innerHTML.split(':')[0].trim() + ':' + document.getElementById('clock').innerHTML.split(':')[1].trim();
@@ -163,6 +175,55 @@
         }
 
 
+        function sendFrameToFlask() {
+            const canvas = document.createElement("canvas");
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            const context = canvas.getContext("2d");
+            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+            // Convert canvas data to Base64-encoded image
+            const imageData = canvas.toDataURL("image/jpeg");
+
+            fetch('/handle_frameData', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ image_data: imageData }),
+              })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('Network response was not ok');
+                }
+                return response.json();
+              })
+              .then(data => {
+                console.log('Response:', data);
+                var dbTime=addMinutesToTime(JSON.parse(localStorage.getItem('listTime'))[JSON.parse(localStorage.getItem('classes')).indexOf(document.getElementById('classSelector').value)].toString(),parseInt(document.getElementById('bufferTime').value));
+                    const rollNumber=data;
+                    if(document.querySelector(`li[data-roll-number="${rollNumber}"]`).style.backgroundColor==''){
+                        var curr=document.getElementById('clock').innerHTML.split(':')[0].trim() + ':' + document.getElementById('clock').innerHTML.split(':')[1].trim();
+                        if(compareTimes(dbTime,curr)==-1){
+                            const button = document.querySelector(`li[data-roll-number="${rollNumber}"] button.leave`);
+                            button.disabled=false;
+                            button.click();
+                            button.disabled=true;
+                            receiveMessageFromWebSocket(rollNumber,'Late Marked');
+                        }else{
+                            const button = document.querySelector(`li[data-roll-number="${rollNumber}"] button.present`);
+                            button.disabled=false;
+                            button.click();
+                            button.disabled=true;
+                            receiveMessageFromWebSocket(rollNumber,'Present Marked');
+                        }
+                    }
+              })
+              .catch(error => {
+                console.error('Error:', error);
+              });
+        }
+
         // Connect to WebSocket when page loads
         window.onload = function() {
             startVideoStream();
@@ -170,13 +231,15 @@
                 window.location.href = '/register'; // Redirect to the /register endpoint
             });
             document.getElementById('startSocket').addEventListener('click', function() {
-                connectToWebSocket();
+                //connectToWebSocket();
+                sendFrameInterval=setInterval(sendFrameToFlask, 1000);
                 disableEnableAllButtons();
                 // Repeat sending frames to server every 5 seconds
-                sendFrameInterval=setInterval(sendFrameToServer, 2000);
+                //sendFrameInterval=setInterval(sendFrameToServer, 2000);
             });
             document.getElementById('stopSocket').addEventListener('click', function() {
                 handleRestrictedButtonClick(disableEnableAllButtons);
+                
             });
             const display = document.getElementById('clock');
 

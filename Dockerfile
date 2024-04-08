@@ -2,11 +2,7 @@
 
 FROM python:3.10.3-slim-bullseye
 FROM dataocean42/face_recognition:pi
-
-ENV APP_DIR=/root/Attendance_system
-ENV VIRTUAL_ENV=/root/Attendance_system/venv
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-
+FROM ubuntu:18.04
 
 # RUN apt-get -y update
 # RUN apt-get install -y --fix-missing \
@@ -47,30 +43,21 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 #     pip3 install -r requirements.txt
 # RUN whatever_command_you_run_to_start_your_app
 
-WORKDIR $APP_DIR
+RUN apt-get update -y
+RUN apt-get install python3-pip -y
+RUN apt-get install gunicorn3 -y
+RUN pip3 install --upgrade pip
 
-# Copy the Flask application files
-COPY . $APP_DIR
+COPY . /root/Attendance_system
+RUN cd /root/Attendance_system && \
+    pip3 install -r requirements.txt
 
-# Set up Python virtual environment
-RUN python3 -m venv $VIRTUAL_ENV
+WORKDIR /root/Attendance_system
 
 RUN export NEURELO_API_KEY="neurelo_9wKFBp874Z5xFw6ZCfvhXdrIxbYidUfYmprDJks1tK7y+CdPciG0qgAl1exw69RQYdQYxvqcRG1GgVajqZknUzwW3VIC3xEqNyynTa2l6w7oNlrUhKRqRwBMMl8+7AZa47Yep4FXq3GDsvF4EEl8V0KoyaErzYwNp/1UgzVKPIIJ0g4CU0FZ7DttiyrVmTey_QQJSGjZU26OLFcPkkURgzkUzltgQryhI0R5NRDB76x4="
 
 
-RUN pip install --no-cache-dir gunicorn flask
-
-# Expose the port on which your Flask app will run
-EXPOSE 8000
-
-# Start your Flask application using Gunicorn
-CMD ["gunicorn", "-b", "0.0.0.0:8000", "app:app"]
-
-
-# ENTRYPOINT [ "python3" ]
-
-# # # CMD ["websocet_server.py" ]
-# CMD ["application.py"]
+CMD [ "gunicorn3","-b","0.0.0.0:8000","application:app","--workers=5" ]
 
 # ENV FLASK_APP=application.py
 

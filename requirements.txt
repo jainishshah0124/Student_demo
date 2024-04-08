@@ -3,4 +3,5 @@ requests
 websockets
 pillow
 numpy
+face_recognition
 opencv-python

@@ -149,22 +149,38 @@ function populateClasses() {
         classSelector.add(newClassOption);
     });
 }
-function callMethod(){
-    $.ajax({
-        url: '/retriveAttendanceSummary',
-        type: 'POST',
-        contentType: 'application/json',
-        data : JSON.stringify({ subject_code : document.getElementById('classSelector').value  }),
-        success: function (response) {
-            console.log('Data sent successfully:', response);
-            localStorage.setItem('attendanceData',JSON.stringify(response));
-            renderCalendar();
-        },
-        error: function (xhr, status, error) {
-            console.error('Error sending data:', error);
-        }
-    });
+async function retrieveAttendanceSummary() {
+    const subjectCode = document.getElementById('classSelector').value; // Assuming you have an input field for subject code
+    const url = `https://us-east-2.aws.neurelo.com/custom/attendance_count_summary?subject_code=${subjectCode}`;
+    const apiKey = "neurelo_9wKFBp874Z5xFw6ZCfvhXdrIxbYidUfYmprDJks1tK7y+CdPciG0qgAl1exw69RQYdQYxvqcRG1GgVajqZknUzwW3VIC3xEqNyynTa2l6w7oNlrUhKRqRwBMMl8+7AZa47Yep4FXq3GDsvF4EEl8V0KoyaErzYwNp/1UgzVKPIIJ0g4CU0FZ7DttiyrVmTey_QQJSGjZU26OLFcPkkURgzkUzltgQryhI0R5NRDB76x4=";
 
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-API-KEY': apiKey
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        debugger;
+        const data = await response.json();
+        console.log(data); // Do something with the response data
+        console.log('Data sent successfully:', data.data);
+        localStorage.setItem('attendanceData',JSON.stringify(data.data));
+        renderCalendar();
+        return data;
+    } catch (error) {
+        console.error('There was a problem with the fetch operation:', error);
+    }
+}
+
+
+function callMethod(){
+    retrieveAttendanceSummary();
 }
 document.addEventListener("DOMContentLoaded",
     function () {

@@ -5,3 +5,4 @@ pillow
 numpy
 face_recognition
 opencv-python
+azure-storage-blob

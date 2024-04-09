@@ -232,7 +232,7 @@
             });
             document.getElementById('startSocket').addEventListener('click', function() {
                 //connectToWebSocket();
-                sendFrameInterval=setInterval(sendFrameToFlask, 1000);
+                sendFrameInterval=setInterval(sendFrameToFlask, 2000);
                 disableEnableAllButtons();
                 // Repeat sending frames to server every 5 seconds
                 //sendFrameInterval=setInterval(sendFrameToServer, 2000);

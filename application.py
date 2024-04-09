@@ -1,4 +1,5 @@
 from flask import Flask, render_template,request,g,redirect,url_for,jsonify,session,Response
+from azure.storage.blob import BlobServiceClient
 import JSON
 import base64
 from datetime import date
@@ -121,10 +122,22 @@ def save_image():
     # Extract base64-encoded image data
     _, encoded_data = image_data.split(',', 1)
     decoded_data = base64.b64decode(encoded_data)
+    strong_connection_string = 'DefaultEndpointsProtocol=https;AccountName=cs41003200254e816d4;AccountKey=+fIuDGjtc3RqRYNfVM9qFKgR9opVMzMtaDMQsYDMKkferKuFXS/17cPdIkokd/IZaQaAvFdGYec3+AStKPQ4pw==;EndpointSuffix=core.windows.net'
 
+    dataset_connection = BlobServiceClient.from_connection_string(strong_connection_string)
     # Save the image to a file
     with open(f'{path}.jpg', 'wb') as f:
         f.write(decoded_data)
+    file_folder='./Datasets/'
+    file_name=employee_id+'.jpg'
+    blob_obj=dataset_connection.get_blob_client(container='datasets',blob=file_name)
+    if blob_obj.exists():
+        # If blob exists, delete it
+        print(f"Deleting existing blob: {file_name}")
+        blob_obj.delete_blob()
+    with open(os.path.join(file_folder,file_name),mode='rb') as file_data:
+        blob_obj.upload_blob(file_data)
+    
     print(JSON.updateJSONCALL('https://us-east-2.aws.neurelo.com/rest/employees/'+employee_id,{"photo_path":path+".jpg","is_dataset_avaliable": "Y"},'PATCH').text)
     return redirect('/attendance')
 
@@ -142,6 +155,42 @@ def attendance():
     if 'username' not in session:
             error_message = "Please Login"
             return render_template('login.html', error_message=error_message)
+    
+    #retrive Data
+    strong_connection_string = 'DefaultEndpointsProtocol=https;AccountName=cs41003200254e816d4;AccountKey=+fIuDGjtc3RqRYNfVM9qFKgR9opVMzMtaDMQsYDMKkferKuFXS/17cPdIkokd/IZaQaAvFdGYec3+AStKPQ4pw==;EndpointSuffix=core.windows.net'
+
+    dataset_connection = BlobServiceClient.from_connection_string(strong_connection_string)
+    container_name = 'datasets'
+
+    # Get the container client
+    container_client = dataset_connection.get_container_client(container_name)
+
+    # Define the local folder to save the downloaded images
+    local_folder = './Datasets/'
+
+    # Create the local folder if it doesn't exist
+    os.makedirs(local_folder, exist_ok=True)
+
+    # Iterate over blobs in the container
+    for blob in container_client.list_blobs():
+        # Construct blob client for the blob
+        blob_client = dataset_connection.get_blob_client(container=container_name, blob=blob.name)
+        
+        # Define the local file path to save the downloaded blob
+        local_file_path = os.path.join(local_folder, blob.name)
+        
+        # Check if the file already exists locally
+        if os.path.exists(local_file_path):
+            print(f"File '{blob.name}' already exists locally. Replacing...")
+            os.remove(local_file_path)  # Remove the existing file
+        
+        # Download the blob to the local file system
+        print(f"Downloading file: {blob.name}")
+        with open(local_file_path, "wb") as file:
+            download_stream = blob_client.download_blob()
+            file.write(download_stream.readall())
+
+    print("All files downloaded and replaced successfully.")
     classes=list_classes()
     listclass=[]
     listTime=[]
@@ -331,7 +380,7 @@ def handle_frameData():
     # Create arrays of known face encodings and their names
     known_face_encodings = []
     known_face_names = []
-    
+
     #retrive Data
     data=json.loads(JSON.selectJSONCALL('https://us-east-2.aws.neurelo.com/rest/employees/',"",'GET').text)["data"]
     for dtl in data:
@@ -342,7 +391,7 @@ def handle_frameData():
         known_face_encodings.append(face_encoding)
         known_face_names.append(str(dtl["employee_id"]))
     
-
+    print('error')
     # Initialize some variables
     face_locations = []
     face_encodings = []
@@ -392,6 +441,42 @@ async def handle_websocket(websocket, path):
     known_face_names = []
     
     #retrive Data
+    strong_connection_string = 'DefaultEndpointsProtocol=https;AccountName=cs41003200254e816d4;AccountKey=+fIuDGjtc3RqRYNfVM9qFKgR9opVMzMtaDMQsYDMKkferKuFXS/17cPdIkokd/IZaQaAvFdGYec3+AStKPQ4pw==;EndpointSuffix=core.windows.net'
+
+    dataset_connection = BlobServiceClient.from_connection_string(strong_connection_string)
+    container_name = 'datasets'
+
+    # Get the container client
+    container_client = dataset_connection.get_container_client(container_name)
+
+    # Define the local folder to save the downloaded images
+    local_folder = './Datasets/'
+
+    # Create the local folder if it doesn't exist
+    os.makedirs(local_folder, exist_ok=True)
+
+    # Iterate over blobs in the container
+    for blob in container_client.list_blobs():
+        # Construct blob client for the blob
+        blob_client = dataset_connection.get_blob_client(container=container_name, blob=blob.name)
+        
+        # Define the local file path to save the downloaded blob
+        local_file_path = os.path.join(local_folder, blob.name)
+        
+        # Check if the file already exists locally
+        if os.path.exists(local_file_path):
+            print(f"File '{blob.name}' already exists locally. Replacing...")
+            os.remove(local_file_path)  # Remove the existing file
+        
+        # Download the blob to the local file system
+        print(f"Downloading file: {blob.name}")
+        with open(local_file_path, "wb") as file:
+            download_stream = blob_client.download_blob()
+            file.write(download_stream.readall())
+
+    print("All files downloaded and replaced successfully.")
+
+
     data=json.loads(JSON.selectJSONCALL('https://us-east-2.aws.neurelo.com/rest/employees/',"",'GET').text)["data"]
     for dtl in data:
         if(dtl["photo_path"]==''):
@@ -457,3 +542,6 @@ def start_websocket_server():
 def api():
 
     return ''
+
+if __name__ == '__main__':
+    app.run(debug=True)

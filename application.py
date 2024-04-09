@@ -122,7 +122,7 @@ def save_image():
     # Extract base64-encoded image data
     _, encoded_data = image_data.split(',', 1)
     decoded_data = base64.b64decode(encoded_data)
-    strong_connection_string = 'DefaultEndpointsProtocol=https;AccountName=cs41003200254e816d4;AccountKey=+fIuDGjtc3RqRYNfVM9qFKgR9opVMzMtaDMQsYDMKkferKuFXS/17cPdIkokd/IZaQaAvFdGYec3+AStKPQ4pw==;EndpointSuffix=core.windows.net'
+    strong_connection_string = ''
 
     dataset_connection = BlobServiceClient.from_connection_string(strong_connection_string)
     # Save the image to a file
@@ -157,7 +157,7 @@ def attendance():
             return render_template('login.html', error_message=error_message)
     
     #retrive Data
-    strong_connection_string = 'DefaultEndpointsProtocol=https;AccountName=cs41003200254e816d4;AccountKey=+fIuDGjtc3RqRYNfVM9qFKgR9opVMzMtaDMQsYDMKkferKuFXS/17cPdIkokd/IZaQaAvFdGYec3+AStKPQ4pw==;EndpointSuffix=core.windows.net'
+    strong_connection_string = ''
 
     dataset_connection = BlobServiceClient.from_connection_string(strong_connection_string)
     container_name = 'datasets'
@@ -441,7 +441,7 @@ async def handle_websocket(websocket, path):
     known_face_names = []
     
     #retrive Data
-    strong_connection_string = 'DefaultEndpointsProtocol=https;AccountName=cs41003200254e816d4;AccountKey=+fIuDGjtc3RqRYNfVM9qFKgR9opVMzMtaDMQsYDMKkferKuFXS/17cPdIkokd/IZaQaAvFdGYec3+AStKPQ4pw==;EndpointSuffix=core.windows.net'
+    strong_connection_string = ''
 
     dataset_connection = BlobServiceClient.from_connection_string(strong_connection_string)
     container_name = 'datasets'

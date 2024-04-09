@@ -2,7 +2,7 @@ import os
 from azure.storage.blob import BlobServiceClient
 import shutil
 
-strong_connection_string = 'DefaultEndpointsProtocol=https;AccountName=cs41003200254e816d4;AccountKey=+fIuDGjtc3RqRYNfVM9qFKgR9opVMzMtaDMQsYDMKkferKuFXS/17cPdIkokd/IZaQaAvFdGYec3+AStKPQ4pw==;EndpointSuffix=core.windows.net'
+strong_connection_string = ''
 
 dataset_connection = BlobServiceClient.from_connection_string(strong_connection_string)
 

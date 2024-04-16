@@ -235,7 +235,7 @@
                 sendFrameInterval=setInterval(sendFrameToFlask, 2000);
                 disableEnableAllButtons();
                 // Repeat sending frames to server every 5 seconds
-                //sendFrameInterval=setInterval(sendFrameToServer, 2000);
+                //sendFrameInterval=setInterval(sendFrameToServer, 1500);
             });
             document.getElementById('stopSocket').addEventListener('click', function() {
                 handleRestrictedButtonClick(disableEnableAllButtons);

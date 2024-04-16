@@ -1,5 +1,3 @@
-# This is a sample Dockerfile you can modify to deploy your own app based on face_recognition
-
 FROM python:3.10.3-slim-bullseye
 FROM ubuntu:18.04
 
@@ -33,23 +31,13 @@ RUN apt-get install python3-pip -y
 RUN apt-get install gunicorn3 -y
 RUN pip3 install --upgrade pip
 
-RUN pip3 install setuptools
+RUN pip3 install --upgrade pip setuptools wheel
  
 RUN cd ~ && \
     mkdir -p dlib && \
     git clone -b 'v19.9' --single-branch https://github.com/davisking/dlib.git dlib/ && \
     cd  dlib/ && \
     python3 setup.py install --yes USE_AVX_INSTRUCTIONS
-
-
-# The rest of this file just runs an example script.
-
-# If you wanted to use this Dockerfile to run your own app instead, maybe you would do this:
-# COPY . /root/your_app_or_whatever
-# RUN cd /root/your_app_or_whatever && \
-#     pip3 install -r requirements.txt
-# RUN whatever_command_you_run_to_start_your_app
-
 
 COPY . /root/Attendance_system
 RUN cd /root/Attendance_system && \
@@ -61,13 +49,3 @@ RUN export NEURELO_API_KEY="neurelo_9wKFBp874Z5xFw6ZCfvhXdrIxbYidUfYmprDJks1tK7y
 
 
 CMD [ "gunicorn3","-b","0.0.0.0:8000","application:app","--workers=5" ]
-
-# ENV FLASK_APP=application.py
-
-# #CMD ["flask", "run", "--host=0.0.0.0"]
-# CMD ["sh", "-c", "flask run --host=0.0.0.0 port=5001"]
-
-# Add pip3 install opencv-python==4.1.2.30 if you want to run the live webcam examples
-
-# CMD cd /root/Attendance_system && \
-#     python3 application.py

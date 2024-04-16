@@ -73,8 +73,8 @@ async def handle_websocket(websocket, path):
             await websocket.send(name)
             name="Unknown"
 
-start_server = websockets.serve(handle_websocket, "rollcallsystem.bluebush-887dce0f.eastus2.azurecontainerapps.io", 8767)
-#start_server = websockets.serve(handle_websocket, "127.0.0.1", 8767)
+#start_server = websockets.serve(handle_websocket, "rollcallsystem.bluebush-887dce0f.eastus2.azurecontainerapps.io", 8767)
+start_server = websockets.serve(handle_websocket, "127.0.0.1", 8767)
 
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()
